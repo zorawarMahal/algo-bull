@@ -7,7 +7,7 @@ import axios from 'axios';
 import { Toaster } from "./components/ui/sonner";
 import { ProtectedRoute } from './components/ProtectedRoute';
 
-const API_URL = 'http://localhost:8080';
+const API_URL = 'https://algo-bull.onrender.com';
 
 function App() {
   const { isLoading, isAuthenticated, getAccessTokenSilently } = useAuth0();
