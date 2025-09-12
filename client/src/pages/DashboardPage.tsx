@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 
-const API_URL = 'http://localhost:8080';
+const API_URL = 'https://algo-bull.onrender.com';
 
 type LeetCodeStats = {
   totalSolved: number;
