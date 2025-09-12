@@ -1,15 +1,21 @@
-import { useAuth0 } from '@auth0/auth0-react';
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { LogoutButton } from '../components/LogoutButton';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { StatsCard } from '../components/StatsCard';
+import { useAuth0 } from "@auth0/auth0-react";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { LogoutButton } from "../components/LogoutButton";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { StatsCard } from "../components/StatsCard";
 import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Loader2 } from "lucide-react";
 
-const API_URL = 'https://algo-bull.onrender.com';
+const API_URL = "http://localhost:8080";
 
 type LeetCodeStats = {
   totalSolved: number;
@@ -19,15 +25,15 @@ type LeetCodeStats = {
 };
 
 type SavedHandles = {
-  [key: string]: string; 
+  [key: string]: string;
 };
 
 export const DashboardPage = () => {
   const { user, getAccessTokenSilently } = useAuth0();
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState("");
   const [stats, setStats] = useState<LeetCodeStats | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [savedHandles, setSavedHandles] = useState<SavedHandles>({});
 
   useEffect(() => {
@@ -52,14 +58,18 @@ export const DashboardPage = () => {
     e.preventDefault();
     if (!username) return;
     setIsLoadingStats(true);
-    setError('');
+    setError("");
     setStats(null);
     try {
-      const response = await axios.get(`${API_URL}/api/stats/leetcode/${username}`);
+      const response = await axios.get(
+        `${API_URL}/api/stats/leetcode/${username}`
+      );
       setStats(response.data);
     } catch (err) {
       console.error("Failed to fetch stats", err);
-      setError('Failed to fetch stats. Please check the username and try again.');
+      setError(
+        "Failed to fetch stats. Please check the username and try again."
+      );
     } finally {
       setIsLoadingStats(false);
     }
@@ -71,11 +81,11 @@ export const DashboardPage = () => {
       const token = await getAccessTokenSilently();
       await axios.post(
         `${API_URL}/api/handles`,
-        { platform: 'leetcode', handle: username },
+        { platform: "leetcode", handle: username },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success("LeetCode handle saved successfully!");
-      setSavedHandles(prev => ({ ...prev, leetcode: username }));
+      setSavedHandles((prev) => ({ ...prev, leetcode: username }));
     } catch (err) {
       console.error("Failed to save handle", err);
       toast.error("Failed to save handle.");
@@ -83,76 +93,129 @@ export const DashboardPage = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-8">
-      <header className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-        <h1 className="text-3xl font-bold">AlgoBull Dashboard</h1>
-        <div className="flex items-center gap-4">
-          <p className="text-muted-foreground">{user?.email}</p>
-          <LogoutButton />
-        </div>
-      </header>
-      
-      {/* --- ADDED THIS SECTION TO DISPLAY SAVED HANDLES --- */}
-      {Object.keys(savedHandles).length > 0 && (
-        <div className="mb-8 p-4 border rounded-lg">
-          <h3 className="text-lg font-semibold mb-3">Your Saved Handles</h3>
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(savedHandles).map(([platform, handle]) => (
-              <Badge key={platform} variant="secondary" className="text-sm">
-                <span className="capitalize font-medium mr-2">{platform}:</span>
-                <span>{handle}</span>
-              </Badge>
-            ))}
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black text-white">
+      {/* Header */}
+      <header className="w-full bg-gradient-to-r from-purple-600/20 to-blue-600/20 border-b border-white/10">
+        <div className="container mx-auto flex flex-col md:flex-row justify-between items-center px-6 py-4 gap-4">
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+            AlgoBull Dashboard
+          </h1>
+          <div className="flex items-center gap-4">
+            <p className="text-sm text-gray-300">{user?.email}</p>
+            <LogoutButton />
           </div>
         </div>
-      )}
-      {/* --- END OF ADDED SECTION --- */}
-      
-      <main className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <Card>
+      </header>
+
+      {/* Content */}
+      <div className="container mx-auto px-6 py-10">
+        {/* Saved Handles */}
+        {Object.keys(savedHandles).length > 0 && (
+          <Card className="mb-10 bg-black/40 border-white/10">
             <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <img src="https://leetcode.com/static/images/LeetCode_logo_rvs.png" alt="LeetCode Logo" className="w-6 h-6 bg-white rounded-full p-0.5" />
-                  LeetCode
-                </CardTitle>
+              <CardTitle className="text-lg text-slate-500 font-semibold">
+                Your Saved Handles
+              </CardTitle>
             </CardHeader>
             <CardContent>
-                <form onSubmit={fetchStats} className="flex flex-col sm:flex-row items-center gap-4 mb-4">
-                  <Input 
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Enter LeetCode username"
-                    className="flex-grow"
-                  />
-                  <div className="flex gap-2 w-full sm:w-auto">
-                    <Button type="submit" disabled={isLoadingStats} className="flex-1">
-                      {isLoadingStats ? 'Fetching...' : 'Get Stats'}
-                    </Button>
-                    <Button type="button" variant="outline" onClick={saveHandle} disabled={!username} className="flex-1">
-                      Save
-                    </Button>
-                  </div>
-                </form>
-                
-                {error && <p className="text-red-500 text-center mt-4">{error}</p>}
-                
-                <div className="flex justify-center mt-4">
-                  {stats && (
-                    <StatsCard platform="LeetCode" username={username} stats={stats} />
-                  )}
+              <div className="flex flex-wrap gap-3">
+                {Object.entries(savedHandles).map(([platform, handle]) => (
+                  <Badge
+                    key={platform}
+                    variant="secondary"
+                    className="px-3 py-1 text-sm bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-white border border-white/10"
+                  >
+                    <span className="capitalize font-medium mr-2">
+                      {platform}:
+                    </span>
+                    <span>{handle}</span>
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Main grid */}
+        <main className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* LeetCode Section */}
+          <Card className="bg-black/40 border-white/10">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <img
+                  src="https://leetcode.com/static/images/LeetCode_logo_rvs.png"
+                  alt="LeetCode Logo"
+                  className="w-7 h-7 bg-white rounded-full p-0.5"
+                />
+                <span className="font-semibold text-slate-400">LeetCode</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form
+                onSubmit={fetchStats}
+                className="flex flex-col sm:flex-row items-center gap-4 mb-6"
+              >
+                <Input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter LeetCode username"
+                  className="flex-grow bg-black/50 border-white/10 text-white placeholder-gray-400"
+                />
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <Button
+                    type="submit"
+                    disabled={isLoadingStats}
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white"
+                  >
+                    {isLoadingStats ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Fetching...
+                      </span>
+                    ) : (
+                      "Get Stats"
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={saveHandle}
+                    disabled={!username}
+                    className="flex-1 border-white/20 text-black hover:bg-white/10"
+                  >
+                    Save
+                  </Button>
                 </div>
+              </form>
+
+              {error && (
+                <p className="text-red-400 text-center mt-4">{error}</p>
+              )}
+
+              <div className="flex justify-center mt-6">
+                {stats && (
+                  <StatsCard platform="LeetCode" username={username} stats={stats} />
+                )}
+              </div>
             </CardContent>
-        </Card>
-        <Card className="flex flex-col items-center justify-center bg-muted/40 border-dashed">
+          </Card>
+
+          {/* Coming Soon Section */}
+          <Card className="flex flex-col items-center justify-center bg-black/30 border-dashed border-white/10">
             <CardHeader>
-                <CardTitle className="text-muted-foreground">More platforms coming soon!</CardTitle>
+              <CardTitle className="text-gray-400">
+                More platforms coming soon 🚀
+              </CardTitle>
             </CardHeader>
             <CardContent>
-                <p className="text-muted-foreground">Codeforces, HackerRank, and more...</p>
+              <p className="text-sm text-gray-500">
+                Codeforces, HackerRank, and more...
+              </p>
             </CardContent>
-        </Card>
-      </main>
+          </Card>
+        </main>
+      </div>
     </div>
   );
 };
