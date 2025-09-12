@@ -15,7 +15,7 @@ import {
 import { Badge } from "../components/ui/badge";
 import { Loader2 } from "lucide-react";
 
-const API_URL = "https://algo-bull-ecru.vercel.app";
+const API_URL = "https://algo-bull.onrender.com";
 
 type LeetCodeStats = {
   totalSolved: number;
