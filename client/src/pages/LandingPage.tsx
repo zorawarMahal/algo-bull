@@ -51,7 +51,7 @@ export const LandingPage = () => {
 
       {/* Footer */}
       <footer className="text-center py-6 text-gray-500 text-sm">
-        Made with by Zorawar Singh 🚀
+        Made by Zorawar Singh 🚀
       </footer>
     </div>
   );
