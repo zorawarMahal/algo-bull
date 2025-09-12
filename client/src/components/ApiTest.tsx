@@ -4,7 +4,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { Button } from './ui/button';
 
-const API_URL = 'http://localhost:8080'; // Your backend server URL
+const API_URL = 'https://algo-bull.onrender.com'; // Your backend server URL
 
 export const ApiTest = () => {
   const { getAccessTokenSilently } = useAuth0();
